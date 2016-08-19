@@ -18,6 +18,9 @@ try:
             # we need some special handling here to correctly print unicode characters to standard output
             if str is bytes: # this version of Python uses bytes for strings (Python 2)
                 print(u"You said {}".format(value).encode("utf-8"))
+
+                print format(value).encode("utf-8")
+
             else: # this version of Python uses unicode for strings (Python 3+)
                 print("You said {}".format(value))
         except sr.UnknownValueError:
