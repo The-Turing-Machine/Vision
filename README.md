@@ -1,0 +1,2 @@
+# Vision
+Shit done right! 
