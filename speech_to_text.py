@@ -1,4 +1,5 @@
 import speech_recognition as sr
+import text_to_speech
 
 r = sr.Recognizer()
 m = sr.Microphone()
@@ -24,8 +25,12 @@ def stt():
 
                 else: # this version of Python uses unicode for strings (Python 3+)
                     print("You said {}".format(value))
+                    return format(value)
             except sr.UnknownValueError:
-                return "Oops! Didn't catch that"
+                text_to_speech.get_speech("Oops! Didn't catch that,pardon!")
+                continue
+
+
             except sr.RequestError as e:
                 print("Uh oh! Couldn't request results from Google Speech Recognition service; {0}".format(e))
     except KeyboardInterrupt:
