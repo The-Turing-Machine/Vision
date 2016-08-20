@@ -1,15 +1,7 @@
 from gtts import gTTS
+import subprocess
 
-
-tts = gTTS(text='Hello chill bro !', lang='en')
-tts.save("test.mp3")
-
-
-from pygame import mixer
-
-def play():
-    mixer.init()
-    mixer.music.load("test.mp3")
-    mixer.music.play()
-
-play()
+def get_speech(sentence):
+    tts = gTTS(text="command", lang='en')
+    tts.save("test.mp3")
+    subprocess.Popen(['mpg123', '-q', "test.mp3"]).wait()
