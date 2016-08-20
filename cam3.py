@@ -44,92 +44,97 @@ pp = pprint.PrettyPrinter(indent=2)
 clarifai_api = ClarifaiApi('_IKyhCSHnFAqoJ-UdXc1fm0K7q4nXWiIpysjKl2F',
                            'rIJ3yNCKQyunlrx6AIRvu7XJIZ4-oTXgCMiH1-7A')
 
-with picamera.PiCamera() as camera:
-    # camera.resolution = (1024, 768)
-    # camera.framerate = 60
-    time.sleep(2)
-    i = 0
-    dc = (0.05 * i) + 3
 
-    outputs = [{'img': io.BytesIO(), "i": 0, "d": 0} for _ in range(11)]
-    # outputs = [io.BytesIO() for _ in range(10)]
-    start = time.time()
-    for o in outputs:
-        o["i"] = i
-
+def scan():
+    with picamera.PiCamera() as camera:
+        # camera.resolution = (1024, 768)
+        # camera.framerate = 60
+        time.sleep(2)
+        i = 0
         dc = (0.05 * i) + 3
-        p.ChangeDutyCycle(dc)
-        time.sleep(0.2)
-        # #----------------------------------------------------------------------
-        print "Distance Measurement In Progress"
 
-        GPIO.output(TRIG, True)
-        GPIO.output(LED, True)
-        time.sleep(0.00001)
-        GPIO.output(TRIG, False)
-        GPIO.output(LED, False)
+        outputs = [{'img': io.BytesIO(), "i": 0, "d": 0} for _ in range(11)]
+        # outputs = [io.BytesIO() for _ in range(10)]
+        start = time.time()
+        for o in outputs:
+            o["i"] = i
 
-        while GPIO.input(ECHO) == 0:
-            pulse_start = time.time()
+            dc = (0.05 * i) + 3
+            p.ChangeDutyCycle(dc)
+            time.sleep(0.2)
+            # #----------------------------------------------------------------------
+            print "Distance Measurement In Progress"
 
-        while GPIO.input(ECHO) == 1:
-            pulse_end = time.time()
+            GPIO.output(TRIG, True)
+            GPIO.output(LED, True)
+            time.sleep(0.00001)
+            GPIO.output(TRIG, False)
+            GPIO.output(LED, False)
 
-        pulse_duration = pulse_end - pulse_start
-        distance = pulse_duration * 17150
-        distance = round(distance, 2)
+            while GPIO.input(ECHO) == 0:
+                pulse_start = time.time()
 
-        print "Distance : ", str(distance)
-        o["d"] = distance
+            while GPIO.input(ECHO) == 1:
+                pulse_end = time.time()
 
-        # #----------------------------------------------------------------------
+            pulse_duration = pulse_end - pulse_start
+            distance = pulse_duration * 17150
+            distance = round(distance, 2)
 
-        camera.capture(o['img'], 'jpeg', use_video_port=True)
-        print 'click!'
+            print "Distance : ", str(distance)
+            o["d"] = distance
 
-        time.sleep(0.2)
-        i = i + 18
+            # #----------------------------------------------------------------------
 
-    finish = time.time()
-    p.stop()
-    GPIO.cleanup()
-    print('Captured 10 images at %.2ffps' % (10 / (finish - start)))
+            camera.capture(o['img'], 'jpeg', use_video_port=True)
+            print 'click!'
 
-    a = 0
-    # all = set()
-    for o in outputs:
-        # print o
-        print 'outputting'
-        o["img"].seek(0)
-        # o.seek(0)
-        image = Image.open(o["img"])
-        # image = Image.open(o)
+            time.sleep(0.2)
+            i = i + 18
 
-        s = str(a) + '.jpeg'
-        image.save(s, 'JPEG')
+        finish = time.time()
+        p.stop()
+        GPIO.cleanup()
+        print('Captured 10 images at %.2ffps' % (10 / (finish - start)))
 
-        result = clarifai_api.tag_images(open(s, "rb"))
-        tags = result["results"][0]["result"]
+        a = 0
+        # all = set()
+        for o in outputs:
+            # print o
+            print 'outputting'
+            o["img"].seek(0)
+            # o.seek(0)
+            image = Image.open(o["img"])
+            # image = Image.open(o)
 
-        print 'For angle ', o['i'], 'at distance ', o["d"]
-        pp.pprint(tags["tag"]["classes"])
-        # for x in tags["tag"]["classes"]:
-        # all.add(x)
-        # all.append(tags["tag"]["classes"])
-        # pp.pprint(result)
-        # o["tags"] = tags
+            s = str(a) + '.jpeg'
+            image.save(s, 'JPEG')
 
-        # apiKey = "f7b4e46cec678cc5c3a75a13c394605e"
-        #
-        # for i in tags["tag"]["classes"]:
-        #     url = "http://words.bighugelabs.com/api/2/" + apiKey + "/" + i + "/json"
-        #     req = requests.get(url)
-        #     if(req.status_code == requests.codes.ok):
-        #         resp = req.text
-        #         # resp = resp["noun"]["syn"]
-        #         # resp.append(i)
-        #         # pp.pprint(resp)
+            result = clarifai_api.tag_images(open(s, "rb"))
+            tags = result["results"][0]["result"]
 
-        a = a + 1
-    print '---------'
-    print all
+            print 'For angle ', o['i'], 'at distance ', o["d"]
+            pp.pprint(tags["tag"]["classes"])
+            # for x in tags["tag"]["classes"]:
+            # all.add(x)
+            # all.append(tags["tag"]["classes"])
+            # pp.pprint(result)
+            # o["tags"] = tags
+
+            # apiKey = "f7b4e46cec678cc5c3a75a13c394605e"
+            #
+            # for i in tags["tag"]["classes"]:
+            #     url = "http://words.bighugelabs.com/api/2/" + apiKey + "/" + i + "/json"
+            #     req = requests.get(url)
+            #     if(req.status_code == requests.codes.ok):
+            #         resp = req.text
+            #         # resp = resp["noun"]["syn"]
+            #         # resp.append(i)
+            #         # pp.pprint(resp)
+
+            a = a + 1
+        # print '---------'
+        # print all
+
+if __name__ == '__main__':
+    scan()
